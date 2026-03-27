@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Projects - Laud Dzandu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <h2 class="logo">Laud Dzandu</h2>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="gis.html" class="active">GIS</a></li>
+            <li><a href="software.html">Software</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>GIS Projects</h1>
+        <p>A showcase of geospatial analysis, mapping, and layout design projects.</p>
+    </section>
+
+    <!-- GIS Projects Section -->
+    <section class="section gis-section">
+        <h2>GIS Projects & Analysis</h2>
+        <div class="gis-projects">
+
+            <!-- Project 1: Parcel Layout Generator -->
+            <div class="gis-project-card">
+                <h3>🏗️ Parcel Layout Generator</h3>
+                <p>Automated parcel and plot design using Python and QGIS for urban planning.</p>
+                <div class="project-details">
+                    <h4>Description:</h4>
+                    <p>This tool automates the subdivision of land parcels for urban development projects, calculating optimal plot divisions while considering zoning regulations and infrastructure constraints.</p>
+                    
+                    <h4>Code Example:</h4>
+                    <pre><code>import geopandas as gpd
+from shapely.geometry import box
+from shapely.ops import unary_union
+
+# Load parcel boundaries
+parcels = gpd.read_file('parcels.shp')
+
+# Function to subdivide parcel into plots
+def subdivide_parcel(parcel, plot_size=500):
+    """Subdivide a parcel into equal-sized plots"""
+    minx, miny, maxx, maxy = parcel.bounds
+    plots = []
+    
+    x, y = minx, miny
+    while x < maxx:
+        while y < maxy:
+            plot = box(x, y, x+plot_size, y+plot_size)
+            if plot.intersects(parcel):
+                plots.append(plot.intersection(parcel))
+            y += plot_size
+        x += plot_size
+        y = miny
+    
+    return gpd.GeoDataFrame(geometry=plots)
+
+# Generate layout for first parcel
+result = subdivide_parcel(parcels.geometry[0])
+result.to_file('parcel_layout.shp')</code></pre>
+                </div>
+            </div>
+
+            <!-- Project 2: Remote Sensing Analysis -->
+            <div class="gis-project-card">
+                <h3>📡 Remote Sensing Analysis</h3>
+                <p>Satellite imagery analysis for land use and vegetation mapping.</p>
+                <div class="project-details">
+                    <h4>Description:</h4>
+                    <p>Advanced satellite imagery processing using spectral indices to classify land use types, calculate vegetation health (NDVI), and monitor environmental changes over time.</p>
+                    
+                    <h4>Code Example:</h4>
+                    <pre><code>import rasterio
+from rasterio.plot import show
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load satellite bands (Landsat 8)
+with rasterio.open('B5_NIR.tif') as nir:
+    nir_data = nir.read(1).astype(float)
+
+with rasterio.open('B4_RED.tif') as red:
+    red_data = red.read(1).astype(float)
+
+# Calculate NDVI (Normalized Difference Vegetation Index)
+ndvi = (nir_data - red_data) / (nir_data + red_data + 1e-8)
+
+# Classify vegetation
+vegetation = np.where(ndvi > 0.4, 'Dense', 
+             np.where(ndvi > 0.2, 'Moderate', 'Sparse'))
+
+# Visualize results
+plt.imshow(ndvi, cmap='RdYlGn')
+plt.colorbar(label='NDVI Index')
+plt.title('Vegetation Health Analysis')
+plt.show()</code></pre>
+                </div>
+            </div>
+
+            <!-- Project 3: GIS Mapping for Logistics -->
+            <div class="gis-project-card">
+                <h3>🗺️ GIS Mapping for Logistics</h3>
+                <p>Route optimization and spatial planning for transport and logistics projects.</p>
+                <div class="project-details">
+                    <h4>Description:</h4>
+                    <p>Spatial analysis for efficient route planning, warehouse location optimization, and network analysis to minimize transportation costs while maintaining service quality.</p>
+                    
+                    <h4>Code Example:</h4>
+                    <pre><code>import geopandas as gpd
+from shapely.geometry import Point
+import networkx as nx
+
+# Load road network and delivery points
+roads = gpd.read_file('road_network.shp')
+delivery_points = gpd.read_file('delivery_locations.shp')
+
+# Build network graph
+G = nx.Graph()
+for idx, road in roads.iterrows():
+    coords = list(road.geometry.coords)
+    for i in range(len(coords)-1):
+        G.add_edge(coords[i], coords[i+1], 
+                  weight=Point(coords[i]).distance(Point(coords[i+1])))
+
+# Find optimal routes between locations
+def optimize_route(start, end):
+    """Find shortest path between two points"""
+    try:
+        path = nx.shortest_path(G, start, end, weight='weight')
+        distance = nx.shortest_path_length(G, start, end, weight='weight')
+        return path, distance
+    except:
+        return None, None
+
+# Process all deliveries
+for idx, point in delivery_points.iterrows():
+    coords = tuple(point.geometry.coords[0])
+    path, dist = optimize_route(delivery_points.iloc[0].geometry.coords[0], coords)
+    print(f"Route distance: {dist:.2f} units")</code></pre>
+                </div>
+            </div>
+
+            <!-- Project 4: Disaster Management Maps -->
+            <div class="gis-project-card">
+                <h3>⚠️ Disaster Management Maps</h3>
+                <p>Mapping flood zones, evacuation routes, and risk assessments.</p>
+                <div class="project-details">
+                    <h4>Description:</h4>
+                    <p>Comprehensive risk assessment and emergency planning using spatial analysis to identify vulnerable areas, plan evacuation routes, and manage disaster response resources.</p>
+                    
+                    <h4>Code Example:</h4>
+                    <pre><code>import geopandas as gpd
+from shapely.geometry import Polygon
+import numpy as np
+
+# Load critical layers
+flood_zones = gpd.read_file('flood_risk.shp')
+population = gpd.read_file('population_centers.shp')
+infrastructure = gpd.read_file('infrastructure.shp')
+
+# Identify risk areas by buffer analysis
+def assess_risk(flood_layer, infrastructure_layer, buffer=500):
+    """Assess infrastructure at risk"""
+    danger_zone = flood_layer.buffer(buffer)
+    
+    at_risk = infrastructure_layer[
+        infrastructure_layer.geometry.intersects(danger_zone.unary_union)
+    ]
+    return at_risk
+
+# Identify evacuation routes
+def plan_evacuation(at_risk_areas, road_network):
+    """Create evacuation paths from risk zones"""
+    safe_zones = road_network[
+        ~road_network.intersects(at_risk_areas.geometry.unary_union)
+    ]
+    return safe_zones
+
+# Execute risk assessment
+risk_infrastructure = assess_risk(flood_zones, infrastructure)
+evacuation_routes = plan_evacuation(risk_infrastructure, 
+                                    gpd.read_file('roads.shp'))
+
+print(f"At-risk infrastructure: {len(risk_infrastructure)} locations")
+print(f"Safe evacuation routes available: {len(evacuation_routes)}")</code></pre>
+                </div>
+            </div>
+
+            <!-- Project 5: Development Planning GIS -->
+            <div class="gis-project-card">
+                <h3>🏛️ Development Planning GIS</h3>
+                <p>Supporting regional planning and infrastructure mapping projects.</p>
+                <div class="project-details">
+                    <h4>Description:</h4>
+                    <p>Integrated spatial planning framework for regional development, combining land use analysis, infrastructure mapping, and socioeconomic data to support strategic planning decisions.</p>
+                    
+                    <h4>Code Example:</h4>
+                    <pre><code>import geopandas as gpd
+import pandas as pd
+from shapely.geometry import box
+
+# Load planning layers
+land_use = gpd.read_file('land_use.shp')
+infrastructure = gpd.read_file('infrastructure.shp')
+boundaries = gpd.read_file('admin_boundaries.shp')
+
+# Analyze land use distribution
+def analyze_land_use(land_use_layer, region_boundary):
+    """Calculate land use statistics"""
+    clipped = gpd.clip(land_use_layer, region_boundary)
+    
+    stats = clipped.groupby('land_use_type').agg({
+        'geometry': 'count',
+        'area': 'sum'
+    }).rename(columns={'geometry': 'count'})
+    
+    return stats
+
+# Infrastructure accessibility analysis
+def calculate_accessibility(infrastructure_layer, population_layer):
+    """Measure population within service areas"""
+    service_areas = infrastructure_layer.buffer(1000)  # 1km radius
+    
+    accessible = gpd.clip(population_layer, 
+                         service_areas.unary_union)
+    
+    return len(accessible), accessible['population'].sum()
+
+# Generate development report
+for region in boundaries.itertuples():
+    stats = analyze_land_use(land_use, region.geometry)
+    access_count, access_pop = calculate_accessibility(
+        infrastructure, 
+        gpd.clip(pd.read_file('population.shp'), region.geometry)
+    )
+    
+    print(f"\n=== {region.region_name} ===")
+    print(f"Land Use Distribution:\n{stats}")
+    print(f"Population with infrastructure access: {access_pop:,.0f}")</code></pre>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Laud Dzandu | Portfolio Website</p>
+    </footer>
+
+</body>
+</html>
